@@ -1,0 +1,4 @@
+.pylintrc
+*.png
+TODO.md
+.vscode
