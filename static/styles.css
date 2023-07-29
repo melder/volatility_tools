@@ -8,6 +8,13 @@ body {
     height: 100%;
 }
 
+#canvas-container {
+    display: flex;
+    align-items: start;
+    justify-content: center;
+    height: 100%;
+}
+
 #search-form {
     position: relative;
     margin-top: 16px;

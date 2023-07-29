@@ -96,7 +96,7 @@ function render_chart(data) {
                 padding: {
                     right: 50,
                     left: 50,
-                    top: 24,
+                    top: 20,
                     bottom: 80
                 }
             },
@@ -108,5 +108,5 @@ function render_chart(data) {
 function reset_chart() {
     const canvas_html = '<canvas id="line-chart"></canvas>';
     $("#line-chart").remove();
-    $("#chart-container").append(canvas_html);
+    $("#canvas-container").append(canvas_html);
 }
