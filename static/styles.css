@@ -1,14 +1,19 @@
 body {
-    margin-top: 24px;
+    margin: 0;
+    height: 100vh;
+    overflow: hidden;
 }
 
-.form {
+#chart-container {
+    height: 100%;
+}
 
+#search-form {
     position: relative;
+    margin-top: 16px;
 }
 
 .form .fa-search {
-
     position: absolute;
     top: 20px;
     left: 20px;
@@ -17,7 +22,6 @@ body {
 }
 
 .form span {
-
     position: absolute;
     right: 17px;
     top: 13px;
@@ -27,7 +31,6 @@ body {
 }
 
 .form-input {
-
     height: 55px;
     text-indent: 33px;
     border-radius: 10px;

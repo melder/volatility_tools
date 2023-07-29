@@ -93,7 +93,12 @@ function render_chart(data) {
                 }
             },
             layout: {
-                padding: 50
+                padding: {
+                    right: 50,
+                    left: 50,
+                    top: 24,
+                    bottom: 80
+                }
             },
             tension: 0.4
         }
