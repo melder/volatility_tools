@@ -1,6 +1,8 @@
 [submodule "csvs"]
 	path = csvs
 	url = https://github.com/melder/iv_scraper_output
+        branch = main
 [submodule "csv"]
 	path = csv
 	url = git@github.com:melder/symbols_options_csvs.git
+	branch = main
