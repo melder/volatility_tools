@@ -2,3 +2,5 @@
 *.png
 TODO.md
 .vscode
+config/settings.yml
+config/vendors.yml
