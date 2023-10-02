@@ -7,6 +7,9 @@ name = "pypi"
 flask = "*"
 redis = "*"
 pytz = "*"
+pymongo = "*"
+pyyaml = "*"
+polygon-api-client = "*"
 
 [dev-packages]
 

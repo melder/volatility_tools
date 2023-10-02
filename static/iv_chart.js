@@ -2,11 +2,12 @@ function render_chart(data) {
     reset_chart();
 
     const ticker = data.ticker;
-    const ivs_averages = data.average_ivs.map(arr => parseFloat(arr[0]));
-    const timestamps = data.average_ivs.map(arr => arr[1]);
+    //console.log(data.average_ivs);
+    const ivs_averages = data.average_ivs.map(arr => parseFloat(arr.average));
+    const timestamps = data.average_ivs.map(arr => arr.scraper_timestamp_pretty);
     const mean = data.mean;
     const median = data.median;
-    const iso_dates = data.average_ivs.map(arr => arr[1].split("T")[0]);
+    const iso_dates = data.average_ivs.map(arr => arr.expires_at.split("T")[0]);
 
     const percentage = 0.85;
     const min_iv_averages = Math.min(...ivs_averages);
@@ -15,15 +16,19 @@ function render_chart(data) {
     const chart = new Chart(document.getElementById("line-chart"), {
         type: 'line',
         data: {
-            labels: timestamps,
+            // labels: timestamps,
             datasets: [{
-                data: ivs_averages,
+                data: data.average_ivs,
                 label: 'IV %',
                 borderColor: 'blue',
                 fill: 'origin'
             }]
         },
         options: {
+            parsing: {
+                xAxisKey: 'scraper_timestamp',
+                yAxisKey: 'average'
+            },
             responsive: true,
             maintainAspectRatio: true,
             plugins: {
@@ -33,10 +38,18 @@ function render_chart(data) {
                     font: {
                         size: 24,
                         weight: 'bold'
-                    }
+                    },
+                    align: 'end'
                 },
                 legend: {
                     display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        afterLabel: function (context) {
+                            return "Expires at: " + context.raw.expires_at;
+                        }
+                    }
                 },
                 annotation: {
                     annotations: {
@@ -71,10 +84,29 @@ function render_chart(data) {
                             borderWidth: 2,
                         }
                     }
-                }
+                },
+                // interaction: {
+                //     mode: 'nearest',
+                //     axis: 'x',
+                //     intersect: false
+                // },
+                // decimation: {
+                //     enabled: true,
+                //     algorithm: 'lttb',
+                //     samples: 50,
+                //     threshold: 50,
+                // }
             },
             scales: {
                 x: {
+                    // type: 'time',
+                    // time: {
+                    //     unit: 'day',
+                    //     displayFormats: {
+                    //         day: 'D MMM yyyy'
+                    //     },
+                    //     tooltipFormat: 'D MMM yyyy'
+                    // },
                     title: {
                         display: true,
                         text: 'Date'

@@ -9,20 +9,25 @@ body {
 }
 
 #canvas-container {
-    display: flex;
-    align-items: start;
-    justify-content: center;
     height: 100%;
 }
 
-#search-form {
+
+#search-form-container {
     position: relative;
     margin-top: 16px;
 }
 
-.form .fa-search {
+#search-form {
     position: absolute;
     top: 20px;
+    left: 99px;
+    color: #9ca3af;
+}
+
+.form .fa-search {
+    position: absolute;
+    top: 14px;
     left: 20px;
     color: #9ca3af;
 
@@ -38,7 +43,7 @@ body {
 }
 
 .form-input {
-    height: 55px;
+    height: 42px;
     text-indent: 33px;
     border-radius: 10px;
 }

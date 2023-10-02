@@ -26,9 +26,7 @@ $(function () {
 
     $searchInput.on('keydown', function (event) {
         const searchTerm = $searchInput.val().trim();
-        // Check if the pressed key is Enter (key code 13)
         if (event.key === 'Enter') {
-            // Simulate a click event on the button
             ajaxSearch(searchTerm);
         }
     });
