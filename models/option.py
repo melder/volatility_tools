@@ -1,5 +1,8 @@
 from datetime import datetime
-from statistics import median, mean
+from statistics import mean, median
+
+import pytz
+
 from config import config
 
 
@@ -51,7 +54,7 @@ class Option:
                 ivs = []
                 for opt in doc["options"]:
                     ivs.append(float(opt["implied_volatility"]))
-                avg = mean(ivs) if not percentage else mean(ivs) * 100
+                avg = round(mean(ivs) * 100, 2) if percentage else mean(ivs)
                 res.append(
                     {
                         "average": avg,
@@ -60,6 +63,10 @@ class Option:
                             doc["scraper_timestamp"]
                         ),
                         "expires_at": doc["expiration"],
+                        "created_at_pretty": doc["created_at"]
+                        .replace(tzinfo=pytz.utc)
+                        .astimezone(pytz.timezone("US/Eastern"))
+                        .strftime("%a %b %d %Y %-I:%M %p"),
                     }
                 )
             except TypeError as err:
@@ -75,7 +82,7 @@ class Option:
                 ivs = []
                 for opt in doc["options"]:
                     ivs.append(float(opt["implied_volatility"]))
-                avg = median(ivs) if not percentage else median(ivs) * 100
+                avg = round(median(ivs) * 100, 2) if percentage else median(ivs)
                 res.append(
                     {
                         "average": avg,
@@ -84,6 +91,10 @@ class Option:
                             doc["scraper_timestamp"]
                         ),
                         "expires_at": doc["expiration"],
+                        "created_at_pretty": doc["created_at"]
+                        .replace(tzinfo=pytz.utc)
+                        .astimezone(pytz.timezone("US/Eastern"))
+                        .strftime("%a %b %d %Y %-I:%M %p"),
                     }
                 )
             except TypeError:
@@ -151,6 +162,6 @@ class Option:
         return self.open_interest(self.last())
 
     @staticmethod
-    def pretty_datetime(timestamp):
+    def pretty_datetime(timestamp, _format="%a %b %d %Y"):
         dt = datetime.fromtimestamp(int(timestamp))
-        return dt.strftime("%a %b %d %Y")
+        return dt.strftime(_format)

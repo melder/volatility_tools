@@ -2,12 +2,11 @@ function render_chart(data) {
     reset_chart();
 
     const ticker = data.ticker;
-    //console.log(data.average_ivs);
+    // console.log(data.average_ivs);
     const ivs_averages = data.average_ivs.map(arr => parseFloat(arr.average));
     const timestamps = data.average_ivs.map(arr => arr.scraper_timestamp_pretty);
     const mean = data.mean;
     const median = data.median;
-    const iso_dates = data.average_ivs.map(arr => arr.expires_at.split("T")[0]);
 
     const percentage = 0.85;
     const min_iv_averages = Math.min(...ivs_averages);
@@ -16,7 +15,6 @@ function render_chart(data) {
     const chart = new Chart(document.getElementById("line-chart"), {
         type: 'line',
         data: {
-            // labels: timestamps,
             datasets: [{
                 data: data.average_ivs,
                 label: 'IV %',
@@ -46,8 +44,11 @@ function render_chart(data) {
                 },
                 tooltip: {
                     callbacks: {
-                        afterLabel: function (context) {
-                            return "Expires at: " + context.raw.expires_at;
+                        title: function (context) {
+                            return context[0].raw.created_at_pretty;
+                        },
+                        footer: function (context) {
+                            return "Expiration: " + context[0].raw.expires_at;
                         }
                     }
                 },
@@ -107,18 +108,18 @@ function render_chart(data) {
                     //     },
                     //     tooltipFormat: 'D MMM yyyy'
                     // },
-                    title: {
-                        display: true,
-                        text: 'Date'
-                    },
                     ticks: {
-                        maxTicksLimit: 8
-                    }
+                        callback: function (value, index, ticks) {
+                            return timestamps[index];
+                        },
+                        maxTicksLimit: 12
+                    },
+
                 },
                 y: {
                     title: {
                         display: true,
-                        text: 'IV %'
+                        text: 'Implied Volatility %'
                     },
                     max: Math.round(Math.max(...ivs_averages) + iv_padding),
                     min: Math.round(Math.min(...ivs_averages) - iv_padding)

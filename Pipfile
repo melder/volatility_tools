@@ -11,6 +11,9 @@ pymongo = "*"
 pyyaml = "*"
 polygon-api-client = "*"
 waitress = "*"
+gunicorn = "*"
+numpy = "*"
+gspread = "*"
 
 [dev-packages]
 
