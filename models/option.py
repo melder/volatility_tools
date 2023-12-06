@@ -1,6 +1,6 @@
 from datetime import datetime
 from statistics import mean, median
-
+import json
 import pytz
 
 from config import config
@@ -18,6 +18,9 @@ class Option:
     # db attributes
     db = config.mongo_db()
     collection = db["options"]
+
+    redis = config.redis_client()
+    redis_namespace = ":".join(["vol", "option"])
 
     @classmethod
     def test_mongo(cls):
@@ -75,31 +78,35 @@ class Option:
         return res
 
     # TODO: compress into single function
-    def median_ivs(self, percentage=True):
+    def median_ivs(self):
         res = []
         for doc in list(self.all()):
-            try:
-                ivs = []
-                for opt in doc["options"]:
-                    ivs.append(float(opt["implied_volatility"]))
-                avg = round(median(ivs) * 100, 2) if percentage else median(ivs)
-                res.append(
-                    {
-                        "average": avg,
-                        "scraper_timestamp": doc["scraper_timestamp"],
-                        "scraper_timestamp_pretty": self.pretty_datetime(
-                            doc["scraper_timestamp"]
-                        ),
-                        "expires_at": doc["expiration"],
-                        "created_at_pretty": doc["created_at"]
-                        .replace(tzinfo=pytz.utc)
-                        .astimezone(pytz.timezone("US/Eastern"))
-                        .strftime("%a %b %d %Y %-I:%M %p"),
-                    }
-                )
-            except TypeError:
-                continue
+            if item := self.to_chart(doc):
+                res.append(item)
+
         return res
+
+    @staticmethod
+    def to_chart(doc, percentage=True):
+        try:
+            ivs = []
+            for opt in doc["options"]:
+                ivs.append(float(opt["implied_volatility"]))
+            avg = round(median(ivs) * 100, 2) if percentage else median(ivs)
+            return {
+                "average": avg,
+                "scraper_timestamp": doc["scraper_timestamp"],
+                "scraper_timestamp_pretty": Option.pretty_datetime(
+                    doc["scraper_timestamp"]
+                ),
+                "expires_at": doc["expiration"],
+                "created_at_pretty": doc["created_at"]
+                .replace(tzinfo=pytz.utc)
+                .astimezone(pytz.timezone("US/Eastern"))
+                .strftime("%a %b %d %Y %-I:%M %p"),
+            }
+        except TypeError:
+            return {}
 
     @staticmethod
     def iv(docs):
@@ -165,3 +172,36 @@ class Option:
     def pretty_datetime(timestamp, _format="%a %b %d %Y"):
         dt = datetime.fromtimestamp(int(timestamp))
         return dt.strftime(_format)
+
+    #########
+    # REDIS #
+    #########
+
+    def median_ivs_redis(self):
+        redis_key = ":".join([self.redis_namespace, "median_iv", self.ticker])
+        return [
+            json.loads(k) | {"scraper_timestamp": str(int(v))}
+            for k, v in self.redis.zrange(redis_key, 0, -1, withscores=True)
+        ]
+
+    def cache_last_median_iv(self):
+        """
+        cache last median implied volatility to redis
+        """
+        if chart_item := self.to_chart(self.last()):
+            score = float(chart_item.pop("scraper_timestamp"))
+
+            redis_key = ":".join([self.redis_namespace, "median_iv", self.ticker])
+            self.redis.zadd(redis_key, {json.dumps(chart_item): score})
+
+    def cache_all_median_ivs(self):
+        """
+        cache median implied volatility for all options to redis
+        """
+        redis_key = ":".join([self.redis_namespace, "median_iv", self.ticker])
+        for chart_item in self.median_ivs():
+            if not chart_item:
+                continue
+
+            score = float(chart_item.pop("scraper_timestamp"))
+            self.redis.zadd(redis_key, {json.dumps(chart_item): score})

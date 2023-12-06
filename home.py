@@ -15,7 +15,7 @@ def chart_data():
     ticker = request.args.get("ticker").upper()
     # average_ivs = cache_datapoints.fetch_average_ivs (ticker)
     # average_ivs = Option(ticker).average_ivs()
-    average_ivs = Option(ticker).average_ivs()
+    average_ivs = Option(ticker).median_ivs_redis()
     data = {
         "ticker": ticker,
         "average_ivs": average_ivs,
@@ -33,9 +33,4 @@ def autocomplete():
 
 @app.route("/")
 def home():
-    return render_template("index.html")
-
-
-@app.route("/v2")
-def home_v2():
     return render_template("index.html")
