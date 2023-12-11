@@ -13,11 +13,18 @@ class Option:
     Properties:
 
     todo
+
+    Indexes:
+
+    db.options.createIndex({ scraper_timestamp: 1 })
+    db.options.createIndex({ ticker: 1 })
     """
+
+    collection_name = "options"
 
     # db attributes
     db = config.mongo_db()
-    collection = db["options"]
+    collection = db[collection_name]
 
     redis = config.redis_client()
     redis_namespace = ":".join(["vol", "option"])
@@ -37,9 +44,14 @@ class Option:
             cls.collection.find({"scraper_timestamp": cls.last_scrape_timestamp()})
         )
 
+    @classmethod
+    def all_tickers(cls):
+        return list(cls.collection.distinct("ticker"))
+
     def __init__(self, ticker, _last=None):
         self.ticker = ticker
         self._last = _last
+        self._all = []
 
     def last(self):
         self._last = self._last or self.collection.find_one(
@@ -47,12 +59,16 @@ class Option:
         )
         return self._last
 
-    def all(self):
-        return self.collection.find({"ticker": self.ticker})
+    def all_docs(self):
+        self._all = self._all or list(self.collection.find({"ticker": self.ticker}))
+        return self._all
+
+    def remove_all(self):
+        return self.collection.delete_many({"ticker": self.ticker})
 
     def average_ivs(self, percentage=True):
         res = []
-        for doc in list(self.all()):
+        for doc in list(self.all_docs()):
             try:
                 ivs = []
                 for opt in doc["options"]:
@@ -80,7 +96,7 @@ class Option:
     # TODO: compress into single function
     def median_ivs(self):
         res = []
-        for doc in list(self.all()):
+        for doc in list(self.all_docs()):
             if item := self.to_chart(doc):
                 res.append(item)
 

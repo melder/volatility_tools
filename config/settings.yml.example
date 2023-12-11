@@ -1,1 +1,10 @@
 version: 0.0.1
+
+pruning:
+  weeks: 13
+
+# RAID is for losers
+backup_directories:
+  - /user/home/backups/vol_tools
+  - /smb/synology/backups/vol_tools
+  - /mount/external_hd/backups/vol_tools
